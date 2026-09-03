@@ -1,3 +1,79 @@
 # dsh-imgdraw
 
-Text-to-image for DeepSeek Harness: `draw_image` model tool, input-bar 生图 button + prompt popup (async generation, 4-grid results, download / keep / delete, persisted history), and an `/imgdraw` image route. Backends: DashScope `wan2.7-image` (free default) and SiliconFlow `Qwen-Image`. See `README.zh.md` for full documentation.
+[English](README.en.md) | 简体中文（中文为准，英文翻译可能滞后）
+
+[![npm version](https://img.shields.io/npm/v/dsh-imgdraw)](https://www.npmjs.com/package/dsh-imgdraw)
+[![License](https://img.shields.io/npm/l/dsh-imgdraw)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/NinjaSln-labs/dsh-imgdraw?style=social)](https://github.com/NinjaSln-labs/dsh-imgdraw)
+
+[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 文生图插件：输入框「🎨 生图」按钮 + 弹窗（提示词 / 尺寸 / 数量 / 后端 / 配额 / 异步生成 / 4 格网格 / 下载 / 选定保留 / 删除 / 历史重新生成），并注册模型工具 `draw_image` 与 `/imgdraw/` 图片路由。正式 bundle：重启不丢，随 profile 自动加载。后端：DashScope `wan2.7-image`（免费默认）与 SiliconFlow `Qwen-Image`。
+
+## 安装
+
+```bash
+# npm 发布后
+dsh plugin add dsh-imgdraw
+```
+
+本地开发（本机 web profile，指向本单库目录）：
+
+```bash
+cd ~/.dsh/profiles/web
+npm add dsh-imgdraw@file:/path/to/dsh-imgdraw
+# 并在 package.json 的 dsh.profile.bundles 列表加入 "dsh-imgdraw"，然后重启 dsh web
+```
+
+## 配置（cordis.patch.yml / profile overlay，均可选）
+
+| 字段 | 默认 | 说明 |
+|---|---|---|
+| `outDir` | `~/.dsh/imgdraw` | 图片输出目录 |
+| `keysPath` | `~/.dsh/image-api-keys.json` | API keys JSON（dashscope / siliconflow 字段） |
+| `routePrefix` | `/imgdraw` | 图片路由前缀（无尾斜杠） |
+| `rpcPath` | `/imgdraw-rpc` | 浏览器 JSON RPC 路由 |
+| `keepLatest` | `24` | 每轮清理后保留的最新文件数（选定保留的文件永不清理） |
+| `maxCount` | `4` | 单次最大生成数量 |
+| `defaultBackend` | `dashscope` | 默认后端：`dashscope`（百炼 wan2.7-image 免费）或 `siliconflow`（Qwen-Image） |
+| `dashscopeModel` | `wan2.7-image` | 百炼模型 |
+| `siliconflowModel` | `Qwen/Qwen-Image` | SiliconFlow 模型 |
+| `historyCap` | `50` | 历史记录条数上限（index.json 最多保留的 job 数） |
+
+示例：
+
+```yaml
+- id: imgdraw
+  name: 'dsh-imgdraw'
+  config:
+    keepLatest: 40
+    defaultBackend: 'dashscope'
+```
+
+## 使用
+
+- **模型工具**：`draw_image`（prompt / count / size / backend / tag）——同步等待生成，返回 `/imgdraw/<文件名>` 列表。
+- **浏览器**：输入框左侧「🎨 生图」→ 弹窗填提示词（可一键填入 Sin v10 头像模板）→ 生成 → 4 格网格预览 → 下载 / 保留 / 删除；「最近生成」历史跨重启持久化（`~/.dsh/imgdraw/index.json`）。
+- **直链**：`http://127.0.0.1:3080/imgdraw/<文件名>`。
+
+## 后端说明
+
+- **百炼 wan2.7-image（默认）**：DashScope `multimodal-generation/generation` 同步端点（国内域名优先，intl 备用）；免费额度有限，用尽后建议切 qwen-image 系列或 z-image-turbo。
+- **SiliconFlow Qwen-Image**：`images/generations` 端点，依赖账户券/余额。
+- keys 文件：`~/.dsh/image-api-keys.json`（`{"dashscope": "sk-...", "siliconflow": "sk-...", ...}`）。
+
+## 开发
+
+```bash
+npm install --legacy-peer-deps   # peer 由宿主 dsh 提供，devDeps 供构建/类型检查
+npm run build                    # tsc → lib/ + esbuild → lib/client.js
+npm run typecheck                # 严格类型检查
+```
+
+已知坑：客户端 RPC 无 harness.handle（bundle 半无此桥），Client→Host 走同源 `/imgdraw-rpc` HTTP；生成必须异步提交 + 轮询（浏览器 fetch 30s 上限）；动态插件重启丢失是 DSH 机制，本包为正式 bundle 不受影响。
+
+## 贡献与发版
+
+贡献指南见 [CONTRIBUTING.md](CONTRIBUTING.md)，开发流程与部署纪律见 [DEVELOPMENT.md](DEVELOPMENT.md)，发布流程见 `.github/workflows/publish.yml`。
+
+## License
+
+MIT
