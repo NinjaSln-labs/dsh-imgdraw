@@ -8,6 +8,18 @@
 
 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 文生图插件：输入框「🎨 生图」按钮 + 弹窗（提示词 / 尺寸 / 数量 / 后端 / 配额 / 异步生成 / 4 格网格 / 下载 / 选定保留 / 删除 / 历史重新生成），并注册模型工具 `draw_image` 与 `/imgdraw/` 图片路由。正式 bundle：重启不丢，随 profile 自动加载。后端：DashScope `wan2.7-image`（免费默认）与 SiliconFlow `Qwen-Image`。
 
+## 特性
+
+- **`draw_image` 模型工具** — 同步等待生成，返回 `/imgdraw/<文件名>` URL 列表。支持 prompt / count / size / backend / tag 参数，AI 可直接在对话中调用。180s 超时，适合大图生成。
+
+- **🎨 生图弹窗** — 输入框左侧按钮 → 弹窗交互：提示词输入（可一键填入 Sin v10 头像模板）、尺寸选择（1:1 / 16:9 / 9:16 / 4:3 / 3:4）、数量选择（1–4 张）、后端切换（dashscope / siliconflow）、实时配额显示（剩余次数/总额度）。提交后异步生成（2s 轮询），结果以 4 格网格展示，每张可下载 / 选定保留（永不清理） / 删除。
+
+- **`/imgdraw` 图片路由** — 直链图片访问：`http://127.0.0.1:3080/imgdraw/<文件名>`。历史记录跨重启持久化（`~/.dsh/imgdraw/index.json`，原子写入）。
+
+- **历史持久化与清理** — 所有 job 记录在 `index.json`，跨重启保留。选定保留的图片永不清理；每轮自动清理保留最新 N 张（默认 24）。支持从历史记录重新生成。
+
+- **多后端支持** — 配置可切换后端与模型，无需改代码。默认 DashScope `wan2.7-image`（免费额度），可选 SiliconFlow `Qwen-Image`，用尽后切 `qwen-image-2.0` / `z-image-turbo`。
+
 ## 安装
 
 ```bash
@@ -69,6 +81,20 @@ npm run typecheck                # 严格类型检查
 ```
 
 已知坑：客户端 RPC 无 harness.handle（bundle 半无此桥），Client→Host 走同源 `/imgdraw-rpc` HTTP；生成必须异步提交 + 轮询（浏览器 fetch 30s 上限）；动态插件重启丢失是 DSH 机制，本包为正式 bundle 不受影响。
+
+## 设计决策
+
+| 决策 | 原因 |
+|---|---|
+| 正式 bundle 而非动态插件 | 动态插件重启丢失是 DSH 机制；正式 bundle 重启不丢、随 profile 自动加载、无需重新批准 |
+| Client→Host 走同源 `/imgdraw-rpc` HTTP | bundle Client 无 `harness.handle` 桥，RPC 需自建同源路由（loopback，文件名 basename 防穿越） |
+| 生成异步提交 + 2s 轮询 | 浏览器 fetch 30s 上限，长耗时生成必须异步；`draw_image` 工具路径可同步等待（180s 超时） |
+| 默认 DashScope 而非 Gemini | Gemini 有地区限制（AI Studio "Unable to check subscription"）；百炼 wan2.7-image 免费额度且国内直连 |
+| 本地计数配额 | API 无账单查询接口，先本地计数 + 手动核对，不做假对接 |
+
+## ⭐ 支持
+
+如果这个插件对你有帮助，欢迎到 [GitHub 仓库](https://github.com/NinjaSln-labs/dsh-imgdraw) 点个 ⭐ Star——它是我持续维护的动力。也欢迎提 issue / PR 一起改进。
 
 ## 贡献与发版
 
