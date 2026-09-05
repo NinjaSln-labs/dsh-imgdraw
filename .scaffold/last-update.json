@@ -27,5 +27,5 @@
     "tsconfig.build.json": "UNCHANGED",
     "tsconfig.json": "UNCHANGED"
   },
-  "rollbackHint": "本次 update 因门禁 FAIL 中断，内容合并与状态层落成两个提交。时间线：\n  f212162 = 标准化之前\n  1a94d2f = 内容合并（人工合并 scaffold 模板）\n  207c9de = scaffold 状态层（lock/manifest/report，即本文件记录）\n  HEAD    = last-update.json 的 commitSha 修正提交\n撤销 scaffold update（保留内容合并）：git revert 207c9de\n完全回到标准化之前：git reset --hard f212162\n注：原记录的 0023cb45 已被 scaffold 的 amend 抹掉（dangling，不可 revert）。"
+  "rollbackHint": "状态层更新提交为 207c9de；其上有 3 个修正提交（f802da5 修正本文件 / e213141 回滚说明 / 72a894f 补写 manifest.files）。\n权威回滚：git reset --hard f212162\n   f212162 = 接入 scaffold 之前的 HEAD（chore: 规范化对齐 dsh-context-compass）\n   实测：reset 后 .scaffold/ 与 scripts/verify.mjs 均移除，工作区 0 处改动。\n   回滚后验证方式回到旧命令：npm run build && npm run typecheck && npm run mount\n   注意 core.hooksPath 在 f212162 时未设置，标准化时启用；回滚后 pre-commit 不再自动跑 check:deploy。\n不要：git revert 207c9de —— 后续提交改了同批状态层文件，中间提交无法干净回退（实测 revert 失败）。\n历史注记：原记录 0023cb45 已被 scaffold 的 amend 抹掉（dangling，不可 revert）。"
 }
