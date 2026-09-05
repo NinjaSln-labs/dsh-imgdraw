@@ -1,0 +1,7 @@
+# NEVER EDIT MANUALLY——scaffold 状态层（手改会欺骗三方合并算法）
+{
+  "template": "scaffold/dsh-plugin",
+  "adopt": false,
+  "at": "2026-09-05T07:05:19.517Z",
+  "files": {}
+}

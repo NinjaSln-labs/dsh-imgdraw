@@ -1,0 +1,30 @@
+{
+  "preUpdateHEAD": "1a94d2fde21ee87997fa1d776d1ed161a6901c27",
+  "commitSha": "0023cb4556b363427dbf0fd5c1b3c5c48189a4cd",
+  "type": "dsh-plugin",
+  "at": "2026-09-05T07:05:19.533Z",
+  "files": {
+    ".githooks/pre-commit": "UNCHANGED",
+    ".github/copilot-instructions.md": "UNCHANGED",
+    ".github/workflows/ci.yml": "MERGE-REVIEW",
+    ".github/workflows/publish.yml": "MERGE-REVIEW",
+    ".gitignore": "MERGE-REVIEW",
+    "AGENTS.md": "MERGE-REVIEW",
+    "CLAUDE.md": "UNCHANGED",
+    "CONTRIBUTING.md": "MERGE-REVIEW",
+    "DEVELOPMENT.md": "MERGE-REVIEW",
+    "LICENSE": "SKIP",
+    "PUBLISHING.md": "MERGE-REVIEW",
+    "README.en.md": "SKIP",
+    "README.md": "SKIP",
+    "SECURITY.md": "MERGE-REVIEW",
+    "package.json": "SKIP",
+    "scripts/build.mjs": "UNCHANGED",
+    "scripts/check-deploy.mjs": "UNCHANGED",
+    "scripts/verify.mjs": "UNCHANGED",
+    "src/config.ts": "SKIP",
+    "src/index.ts": "SKIP",
+    "tsconfig.build.json": "UNCHANGED",
+    "tsconfig.json": "UNCHANGED"
+  }
+}
