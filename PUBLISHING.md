@@ -7,17 +7,28 @@
 
 | 项 | 状态 |
 |---|---|
-| npm | **未发布**（`npm view dsh-imgdraw` → E404）；`package.json` 版本 `0.1.0` 待首版 |
-| GitHub | `NinjaSln-labs/dsh-imgdraw` main；发版 tag `imgdraw-v*` |
+| npm | ✅ **已发布**（2026-09-05）：`0.1.0`（`latest`，CI 带 provenance）+ `0.1.0-rc.1`（`next`，本地 bootstrap 占位，无 provenance） |
+| GitHub | `NinjaSln-labs/dsh-imgdraw` main；发版 tag `imgdraw-v*`（已用：`imgdraw-v0.1.0`） |
 | 本地验证 | 验证链全绿（build → typecheck → mount）+ 实机四点运行时验收通过（工具 / 路由 / RPC / 弹窗） |
-| 前置阻塞 | npmjs.com 尚未配置 Trusted Publisher（指向本仓库 `publish.yml`） |
+| 前置条件 | ✅ **Trusted Publisher 已配置**（2026-09-05，首次即通过）：Owner `NinjaSln-labs` / Repository `dsh-imgdraw` / Workflow file `publish.yml` / Environment 留空 |
 
 ## 版本历史
 
 > 每版一行：**做了什么 + 为什么 + 怎么验证的**；重大教训展开写进当版条目。
 
-- **0.1.0**（未发布）— 文生图 bundle：`draw_image` 工具 + 生图弹窗 + `/imgdraw` 路由 + 历史持久化
-  （feat `760b35d` + fix `2c80983`）；双平台验收（macOS 两次重启 + Linux 四点运行时验证）
+- **0.1.0**（已发布，`latest`）— 文生图 bundle：`draw_image` 工具 + 生图弹窗 + `/imgdraw` 路由 + 历史持久化
+  （feat `760b35d` + fix `2c80983` + 标准化 `1a94d2f`..`6f17e3e`）；tag `imgdraw-v0.1.0` 触发 CI 发布
+  - 验证：CI 7 步全绿（含 `Guard: tag version matches package.json` / Verify / Publish）；provenance
+    `SLSA provenance v1` 已生成（`npm view dist.attestations.provenance` 确认）；`npm audit signatures`
+    23 个 attestations 通过；dist-tags `{ next: 0.1.0-rc.1, latest: 0.1.0 }`
+- **0.1.0-rc.1**（已发布，`next`）— bootstrap 占位：Trusted Publisher 只能配在**已存在**的包上，
+  npm 不给不存在的包配置，故先用本地 `npm publish --tag next` 创建包记录（本地 publish 拿不到 OIDC，
+  因此无 provenance，别加 `--provenance` 会直接报错），再把 `0.1.0` 留给 CI 发正式版
+  - 为什么用 rc 而不是直接发 `0.1.0`：npm 禁止覆盖已发布版本，且 `publish.yml` 有 tag/版本守卫
+    （`GITHUB_REF` 必须等于 `refs/tags/imgdraw-v$(package.json version)`）—— 占位若用 `0.1.0`
+    会把该版本永久锁死，CI 永远发不出
+  - 验证：发布包下载核实干净（12 文件、`dependencies: null`、author 为对象形式）；从 registry 真实
+    安装成功、0 vulnerabilities；host 半 require 报缺 peer 属预期（peer 由宿主 dsh 提供）
 
 
 ## 发布后验证（共性纪律）

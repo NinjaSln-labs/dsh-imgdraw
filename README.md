@@ -3,7 +3,7 @@
 [English](README.en.md) | 简体中文（中文为准，英文翻译可能滞后）
 
 [![npm version](https://img.shields.io/npm/v/dsh-imgdraw)](https://www.npmjs.com/package/dsh-imgdraw)
-[![License](https://img.shields.io/github/license/NinjaSln-labs/dsh-imgdraw)](./LICENSE)
+[![License](https://img.shields.io/npm/l/dsh-imgdraw)](./LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/NinjaSln-labs/dsh-imgdraw?style=social)](https://github.com/NinjaSln-labs/dsh-imgdraw)
 
 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 文生图插件：输入框「🎨 生图」按钮 + 弹窗（提示词 / 尺寸 / 数量 / 后端 / 配额 / 异步生成 / 4 格网格 / 下载 / 选定保留 / 删除 / 历史重新生成），并注册模型工具 `draw_image` 与 `/imgdraw/` 图片路由。正式 bundle：重启不丢，随 profile 自动加载。后端：DashScope `wan2.7-image`（免费默认）与 SiliconFlow `Qwen-Image`。
@@ -133,4 +133,6 @@ npm run typecheck                # 严格类型检查
 
 [MIT](./LICENSE) — Copyright (c) 2026 ninjasln
 
-发布到 npm 后，上方 License 徽章可切换回 `img.shields.io/npm/l/dsh-imgdraw`（取自 `package.json` 的 `license` 字段，当前为 `MIT`）。
+发布后已切回 `img.shields.io/npm/l/dsh-imgdraw`（取自 `package.json` 的 `license` 字段）。
+
+上方 version 徽章在 `0.x` 期间显示为**橙色**，这是 shields.io 对 semver 预发布/零版本的通用着色规则（`esbuild` 0.x 同样为橙色），不是包状态异常；`1.0.0` 起转蓝。
