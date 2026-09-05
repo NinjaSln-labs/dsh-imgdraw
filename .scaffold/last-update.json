@@ -27,5 +27,5 @@
     "tsconfig.build.json": "UNCHANGED",
     "tsconfig.json": "UNCHANGED"
   },
-  "rollbackHint": "本次 update 因门禁 FAIL 中断，内容合并与状态层落成两个提交，完整时间线：\n  f212162 = 标准化之前\n  1a94d2f = 内容合并（人工合并 scaffold 模板）\n  207c9de = scaffold 状态层（lock/manifest/report，即本文件记录）\n  f64a51a = 本修正提交\n撤销 scaffold update（保留内容合并）：git revert 207c9de\n撤销本次修正：git revert f64a51a\n完全回到标准化之前：git reset --hard f212162\n注意：原记录的 0023cb45 已被 scaffold 的 amend 抹掉（dangling，不可 revert）。"
+  "rollbackHint": "本次 update 因门禁 FAIL 中断，内容合并与状态层落成两个提交。时间线：\n  f212162 = 标准化之前\n  1a94d2f = 内容合并（人工合并 scaffold 模板）\n  207c9de = scaffold 状态层（lock/manifest/report，即本文件记录）\n  HEAD    = last-update.json 的 commitSha 修正提交\n撤销 scaffold update（保留内容合并）：git revert 207c9de\n完全回到标准化之前：git reset --hard f212162\n注：原记录的 0023cb45 已被 scaffold 的 amend 抹掉（dangling，不可 revert）。"
 }
