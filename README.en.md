@@ -133,6 +133,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md); development flow and deployment discipli
 
 [MIT](./LICENSE) — Copyright (c) 2026 ninjasln
 
-Switched back to `img.shields.io/npm/l/dsh-imgdraw` after publishing (read from the `license` field in `package.json`).
-
 The version badge above shows **orange** while the version is `0.x` — that is shields.io's standard semver coloring for zero-version packages (`esbuild` 0.x is orange too), not a package-state anomaly; it turns blue from `1.0.0` onward.
