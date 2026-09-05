@@ -66,6 +66,35 @@ npm add dsh-imgdraw@file:/path/to/dsh-imgdraw
 - **浏览器**：输入框左侧「🎨 生图」→ 弹窗填提示词（可一键填入 Sin v10 头像模板）→ 生成 → 4 格网格预览 → 下载 / 保留 / 删除；「最近生成」历史跨重启持久化（`~/.dsh/imgdraw/index.json`）。
 - **直链**：`http://127.0.0.1:3080/imgdraw/<文件名>`。
 
+## HTTP API
+
+两条路由均绑定 `127.0.0.1`（loopback）。所有响应统一 JSON 封套 `{ ok: true, result }` / `{ ok: false, error }`。
+
+### GET
+
+| 路由 | 说明 |
+|---|---|
+| `GET /imgdraw/` | `{ ok, route, files: JobFile[] }` —— 输出目录扫描结果（最近 40 个） |
+| `GET /imgdraw/<文件名>` | 图片二进制（`image/png` 等）；文件名非法（`.` / `..` / 路径分隔符 / >200 字符）→ `400 { ok:false, error:'invalid name' }`；文件名合法但不存在 → `404` |
+
+### POST `/imgdraw-rpc`
+
+请求体为单一封套 `{ "method": "...", "args": { ... } }`。
+
+| 方法 | 参数 | 返回 `result` |
+|---|---|---|
+| `submit` | `prompt`（必填）· `count` 1–4，默认 1 · `size` 默认 `1024*1024` · `backend` `dashscope` \| `siliconflow`，默认取配置 · `tag` 默认 `img`（仅保留 `\w-`，截断 40 字符） | `{ jobId }`；`prompt` 为空时 `ok:false` |
+| `status` | **`jobId`**（注意不是 `id`） | `{ jobId, status, prompt, backend, files, createdAt, finishedAt }`（`error` 仅失败时出现）；查不到时 `ok:false` `任务不存在` |
+| `latest` | — | `{ files, jobs, quota }`（`quota` 为**累计成功次数**，非剩余额度） |
+| `select` | `name`（文件名）· `keep`（`true` 保留 / `false` 取消） | `{ kept }` |
+| `delete` | `name`（文件名） | `{ deleted }`；**只删文件**，任务记录与 `quota` 计数均保留 |
+| `backends` | — | `{ backends: [{ id, label, model, keyPresent, quota, quotaHint, sizeHint }] }` |
+| `refresh-keys` | — | `{ ok }`；重新读取 keys 文件（新增 key 后不必重启） |
+
+文件名参数经 `basename` 归一化并拒绝路径分隔符、`.` / `..` 与超长（>200）名称；`tag` 参与生成文件名 `draw-<tag>-<时间戳>[-<序号>].<ext>`。
+
+`status` 只读进程内任务表（仅由 `submit` 填充，boot 时**不从** `index.json` 回填）—— 重启后重启前提交的任何 `jobId` 都查不到（运行中的任务被标记为 `interrupted`）；`latest` 与 `GET /imgdraw/` 读磁盘，历史与文件跨重启仍可见。
+
 ## 后端说明
 
 - **百炼 wan2.7-image（默认）**：DashScope `multimodal-generation/generation` 同步端点（国内域名优先，intl 备用）；免费额度有限，用尽后建议切 qwen-image 系列或 z-image-turbo。

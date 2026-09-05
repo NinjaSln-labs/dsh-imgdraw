@@ -66,6 +66,35 @@ Example:
 - **Browser**: the 🎨 生图 button next to the input bar → popup with prompt (one-click Sin v10 avatar template) → generate → 4-grid preview → download / keep / delete; "recent" history persists across restarts (`~/.dsh/imgdraw/index.json`).
 - **Direct URL**: `http://127.0.0.1:3080/imgdraw/<file>`.
 
+## HTTP API
+
+Both routes bind to `127.0.0.1` (loopback). All responses use the JSON envelope `{ ok: true, result }` / `{ ok: false, error }`.
+
+### GET
+
+| Route | Description |
+|---|---|
+| `GET /imgdraw/` | `{ ok, route, files: JobFile[] }` — scan of the output directory (latest 40) |
+| `GET /imgdraw/<file>` | Image bytes (`image/png`, etc.); illegal name (`.`, `..`, path separators, >200 chars) → `400 { ok:false, error:'invalid name' }`; legal name but absent → `404` |
+
+### POST `/imgdraw-rpc`
+
+The request body is a single envelope `{ "method": "...", "args": { ... } }`.
+
+| Method | Args | Returns `result` |
+|---|---|---|
+| `submit` | `prompt` (required) · `count` 1–4, default 1 · `size` default `1024*1024` · `backend` `dashscope` \| `siliconflow`, default from config · `tag` default `img` (only `\w-` kept, truncated to 40) | `{ jobId }`; `ok:false` when `prompt` is empty |
+| `status` | **`jobId`** (not `id`) | `{ jobId, status, prompt, backend, files, createdAt, finishedAt }` (`error` present only on failure); `ok:false` `任务不存在` when unknown |
+| `latest` | — | `{ files, jobs, quota }` (`quota` is a **cumulative success count**, not a remaining balance) |
+| `select` | `name` (file name) · `keep` (`true` keep / `false` unkeep) | `{ kept }` |
+| `delete` | `name` (file name) | `{ deleted }`; **removes the file only** — the job record and `quota` counter are retained |
+| `backends` | — | `{ backends: [{ id, label, model, keyPresent, quota, quotaHint, sizeHint }] }` |
+| `refresh-keys` | — | `{ ok }`; reloads the keys file (no restart needed after adding a key) |
+
+File-name args are normalized with `basename` and reject path separators, `.` / `..` and names over 200 chars; `tag` feeds the generated name `draw-<tag>-<timestamp>[-<index>].<ext>`.
+
+`status` reads only the in-process job table (populated by `submit`, **not** back-filled from `index.json` at boot) — after a restart no `jobId` submitted before it is queryable (running jobs are marked `interrupted`); `latest` and `GET /imgdraw/` read from disk, so history and files survive restarts.
+
 ## Backends
 
 - **DashScope wan2.7-image (default)**: synchronous `multimodal-generation/generation` endpoint (CN domain preferred, intl fallback); free quota is limited — switch to qwen-image or z-image-turbo once exhausted.
