@@ -3,5 +3,14 @@
   "template": "scaffold/dsh-plugin",
   "adopt": false,
   "at": "2026-09-05T07:05:19.517Z",
-  "files": {}
+  "files": {
+    ".github/workflows/ci.yml": "0606acb269363c2ed0076432da46325ff0f89cc0ef0f2833e8e5aa4f60fe8ea3",
+    ".github/workflows/publish.yml": "bec4b8af2907b9deade582e6c1d92ea85cd6d2ab172d5d9732780ccebd61b380",
+    ".gitignore": "f1b8834e11fa29b729106c4cc89cb9ab3ce6aa630307be77bc03838334c765d3",
+    "AGENTS.md": "e47f143634ebf221c10d682f6c3a29151a499300b17a732ec8a237a2c3562148",
+    "CONTRIBUTING.md": "b36203ad950bf21ba8128ac9e8ef0cac8ed7ac260c99b884c8acb564088bf3e4",
+    "DEVELOPMENT.md": "5632c473cbc9906f7de60e9cf08ba208e5678500deff9c8c138d82b88727eea4",
+    "PUBLISHING.md": "c36e817764cec4665d3748fa500db27880de5bd525b7acea10d7e556142bb09a",
+    "SECURITY.md": "b0e53d2737ebe46ac25df3e04f0c01d7dc2c1a63e32843e1a09ce00d2ed9d50e"
+  }
 }
