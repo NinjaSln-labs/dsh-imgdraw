@@ -3,7 +3,7 @@
 English | [简体中文](README.md)（Chinese is authoritative; the English translation may lag）
 
 [![npm version](https://img.shields.io/npm/v/dsh-imgdraw)](https://www.npmjs.com/package/dsh-imgdraw)
-[![License](https://img.shields.io/npm/l/dsh-imgdraw)](LICENSE)
+[![License](https://img.shields.io/github/license/NinjaSln-labs/dsh-imgdraw)](./LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/NinjaSln-labs/dsh-imgdraw?style=social)](https://github.com/NinjaSln-labs/dsh-imgdraw)
 
 Text-to-image for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness): an input-bar 🎨 生图 button with a prompt popup (prompt / size / count / backend / quota / async generation / 4-grid results / download / keep / delete / regenerate from history), a `draw_image` model tool, and an `/imgdraw/` image route with persisted history. Shipped as a stable bundle — survives restarts and loads with the profile. Backends: DashScope `wan2.7-image` (free default) and SiliconFlow `Qwen-Image`.
@@ -131,4 +131,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md); development flow and deployment discipli
 
 ## License
 
-MIT
+[MIT](./LICENSE) — Copyright (c) 2026 ninjasln
+
+Once published to npm, the License badge above can be switched back to `img.shields.io/npm/l/dsh-imgdraw` (read from the `license` field in `package.json`, currently `MIT`).
