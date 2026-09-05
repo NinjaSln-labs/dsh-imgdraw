@@ -9,16 +9,16 @@
  *
  * 用法：
  *   node scripts/check-deploy.mjs                # 全量检查 profile 里所有插件
- *   node scripts/check-deploy.mjs --pkg dsh-imgdraw [--pkg ...]  # 只查指定插件
+ *   node scripts/check-deploy.mjs --pkg dsh-imgdraw [--pkg ...]   # 只查指定插件
  *   node scripts/check-deploy.mjs --profile ~/.dsh/profiles/web  # 指定 profile
  *
  * 退出码：0 = 全部 PASS（或无插件安装）；1 = 存在 FAIL。
  */
 
-import { readdirSync, readFileSync, existsSync, statSync, lstatSync } from 'node:fs';
+import { readdirSync, readFileSync, existsSync, lstatSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { homedir } from 'node:os';
-import { join, resolve, isAbsolute, dirname, basename } from 'node:path';
+import { join, resolve, isAbsolute, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -66,6 +66,8 @@ function resolveFileTarget(spec) {
 const pkgJsonPath = join(PROFILE, 'package.json');
 if (!existsSync(pkgJsonPath)) {
   console.error(`✗ profile 不存在或缺少 package.json：${PROFILE}`);
+  console.error(`  → 本机尚未配置该 profile？先执行 dsh plugin --profile web install 完成首次接线，`);
+  console.error(`    再重跑本自检；确属无法部署的中间态可 commit --no-verify 并注明。`);
   process.exit(1);
 }
 const profilePkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
@@ -73,7 +75,7 @@ const deps = profilePkg.dependencies || {};
 const pluginDeps = Object.entries(deps).filter(([name]) => !name.startsWith('@') );
 
 // 本仓库自身包名：单库布局下 REPO_ROOT 即插件目录（源码 lib 在 REPO_ROOT/lib）；
-// 多包布局下 REPO_ROOT/<name>/lib。有 REPO_ROOT/package.json 且 name 匹配时按单库处理。
+// 多包布局下 REPO_ROOT/imgdraw/lib。有 REPO_ROOT/package.json 且 name 匹配时按单库处理。
 let selfName = null;
 try {
   const selfPkgPath = join(REPO_ROOT, 'package.json');

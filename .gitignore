@@ -1,15 +1,34 @@
-node_modules/
-lib/
-*.tgz
-.DS_Store
-*.log
-
-# 本地交接文档私有，不追踪、不入仓库
+# 本机私有信息不入库（与 AGENTS.md 机密纪律同源）
+.env
+.env.*
 HANDOFF.md
 HANDOFF-ARCHIVE/
 
-# commit-msg 钩子含本地私有身份检查，不追踪（pre-commit 随仓库分发）
+# 编辑器与系统
+.DS_Store
+Thumbs.db
+*.log
+
+# 本机私有钩子（commit-msg 含身份检查）不追踪；pre-commit 随仓库分发
 .githooks/commit-msg
 
-# 本地开发记录
+# 构建产物（CI 从 src 重建；只改 lib 不进 src = 修复丢失）
+node_modules/
+lib/
+
+# 视觉回归产物（基线入库，结果不入）
+visual/results/
+test-results/
+
+# client bundle 中间物
+*.tsbuildinfo
+
+# 本仓本地记录（私有，不入库）
 ROADMAP.md
+
+# npm pack 产物
+*.tgz
+
+# scaffold 临时区（review scratch / 模板暂存，不入库）
+.scaffold-merge/
+.scaffold-update/

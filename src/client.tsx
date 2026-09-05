@@ -17,7 +17,6 @@ import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 
 const RPC_PATH = '/imgdraw-rpc'
-const ROUTE_PREFIX = '/imgdraw'
 const POLL_MS = 2000
 
 /** Sin v10 定稿提示词（generated-images/base-prompt.md 英文版，模板预设）。 */
