@@ -39,6 +39,40 @@
 
 > 通道专属验证命令由分类 append 覆盖（按实际通道选择对应命令）。
 
+### 0.1.0 发布后验证结果（2026-09-05，逐项实测）
+
+| 项 | 命令 | 结果 |
+|---|---|---|
+| latest 更新 | `npm view dsh-imgdraw dist-tags` | `{ next: 0.1.0-rc.1, latest: 0.1.0 }`；`npm view dsh-imgdraw version` → `0.1.0` |
+| 溯源链 | `npm view dsh-imgdraw@0.1.0 dist.attestations.provenance` | `predicateType: https://slsa.dev/provenance/v1` |
+| attestation 明细 | `npm audit signatures --json --include-attestations` | 2 条 bundle：npm publish attest（`publish/v0.1`）+ SLSA provenance；均含 Rekor tlog inclusionProof |
+| 产物完整性 | 逐文件 `sha256sum` 比对 | registry 副本 7 个 lib 文件与源码 build **全部字节一致** |
+| 实机重装 | `dsh plugin --profile <临时> add dsh-imgdraw` | EXIT 0，装到 `0.1.0`，specifier `^0.1.0`（registry，非 file:） |
+| 实机挂载 | cordis `Context` harness 挂发布包 | `draw_image` 工具注册（描述 205 字符）+ 路由 `prefix /imgdraw` · `exact /imgdraw-rpc` |
+
+provenance payload 解出的构建链（SLSA v1）：workflow `.github/workflows/publish.yml`
+@ `refs/tags/imgdraw-v0.1.0` → commit `6f17e3e1e641c5d9f51e6268a981dd83d005f165` →
+builder `github-hosted` → run `33958000789` attempts/1 → 仓库
+`NinjaSln-labs/dsh-imgdraw`（repository_id 1355345416）。
+
+**三个容易踩的点**：
+
+1. **`npm audit signatures` 要在「依赖它的工程」里跑，不是本仓** —— 本仓就是 dsh-imgdraw
+   本身，它不在自己的依赖图里（跑出来是 23 条其他包，无 imgdraw 条目）。
+2. **不能裸跑 `pnpm add dsh-imgdraw`** —— 会 `ERR_PNPM_NO_MATCHING_VERSION`。原因：
+   dsh 的宿主包（`dsh-tools` / `dsh-client-runtime` 等）在 npm 上 `latest` 只有
+   `0.0.1-rc.1`，本仓 peer 声明的是 `^0.1.2-alpha.4` / `^0.1.1-rc.2`（同元组下界，见
+   `AGENTS.md` 坑 7），且 `dsh-tools@0.1.2-alpha.x` 自身依赖
+   `@deepseek-ai/dsh-invariants@>=0.1.2 <0.2.0-0`，而该包无任何已发布版本满足
+   （0.1.2 只有 `-alpha.5` / `-rc.1`，均 < 0.1.2）。`dsh plugin add` 能成功是因为它
+   初始化 profile 时写入 `pnpm-workspace.yaml` 含 `autoInstallPeers: false`（宿主在
+   `dsh-app-boot` 的 `PROFILE_PNPM_WORKSPACE` 常量里），于是 peer 不被解析。
+   **所以 README 写 `dsh plugin add` 而非 `pnpm add` 是刻意的**，不要把命令改成裸 pnpm。
+3. **子路径导入受限** —— `exports` 只暴露 `.` / `./client` / `./package.json`，
+   `import 'dsh-imgdraw/lib/index.js'` 会 `ERR_PACKAGE_PATH_NOT_EXPORTED`；
+   正确写法是 `import 'dsh-imgdraw'` 取 `default`。本仓 `scripts/mount.mjs` 用相对路径
+   `../lib/index.js` 绕过 exports（验证源码而非已发布包，故无碍）。
+
 ## 发布通道（npm OIDC Trusted Publishing）
 
 **认证**：npm **Trusted Publishing（OIDC）**——无需 token，`.github/workflows/publish.yml` 的
