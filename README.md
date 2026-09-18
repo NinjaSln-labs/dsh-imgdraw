@@ -134,3 +134,4 @@ npm run typecheck                # 严格类型检查
 [MIT](./LICENSE) — Copyright (c) 2026 ninjasln
 
 上方 version 徽章在 `0.x` 期间显示为**橙色**，这是 shields.io 对 semver 预发布/零版本的通用着色规则（`esbuild` 0.x 同样为橙色），不是包状态异常；`1.0.0` 起转蓝。
+
