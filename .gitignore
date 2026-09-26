@@ -41,3 +41,7 @@ ROADMAP.md
 
 # skill-fit 反馈记录（本地私有）
 .skill-fit/
+
+# Orca ADE（本机配置，不入仓）
+orca.yaml
+.worktreeinclude
