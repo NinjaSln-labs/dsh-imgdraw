@@ -30,6 +30,13 @@ and persisted history. Backends: DashScope wan2.7-image (free default) and Silic
 6. **文档同步**：行为/接口变化同步 README、DEVELOPMENT 速查表（或等价文档）、CHANGELOG（如有）。
 7. **冲突处理**：本文件与生成它的模板源冲突时以模板源为准并回写；用户显式指示优先于本文件，但需在 PR/提交说明中标注冲突点。
 
+## 交接与未决项（project-handoff）
+
+- **未决项（待办 / 坑 / 决策 / 非显然命令）唯一落点 `.handoff/`**，只经 `scripts/handoff.py` CLI 写（单一写入口 + 机检门禁）；不在别处散记，不手改 `.handoff/` 下的文件。
+- 接手：先 `handoff view`（认识整体）+ `handoff next`（本轮下一步）；收尾前 `handoff check` 必须通过。
+- `.handoff/` 为本机私有（`.gitignore` 排除，与旧 `HANDOFF.md` / `HANDOFF-ARCHIVE/` 同待遇）。旧交接模型已于 2026-10-02 迁移入册并归档至 `.handoff/legacy/`。
+- 注：本节为本地追加，模板源（`common/AGENTS-core.md`）下次重生成前应吸收，避免被覆盖丢失。
+
 ## 安全考虑
 
 - 漏洞**不要**公开披露：走 SECURITY.md 指定的私密漏洞报告渠道。
