@@ -1,7 +1,7 @@
 {
   "name": "dsh-imgdraw",
   "description": "Text-to-image for DeepSeek Harness: a `draw_image` model tool, an input-bar 生图 button with a prompt popup (async generation, 4-grid results, download / keep / delete), an /imgdraw image route, and persisted history. Backends: DashScope wan2.7-image (free default) and SiliconFlow Qwen-Image.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "ninjasln",
     "url": "https://github.com/NinjaSln-labs"
