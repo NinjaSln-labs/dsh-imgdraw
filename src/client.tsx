@@ -12,6 +12,7 @@
  * harness.handle host bridge; the host half owns the route).
  */
 import * as React from 'react'
+import { createPortal } from 'react-dom'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 // Type-only: pulls the ui-conversation SlotMap merge (input.left / input.overlay seats).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -118,7 +119,11 @@ async function rpc(method: string, args: Record<string, unknown> = {}): Promise<
   return body.result
 }
 
-function openPopup(): void {
+let anchorRect: { left: number; top: number; width: number } | null = null
+
+function openPopup(anchor?: HTMLElement | null): void {
+  const r = anchor?.getBoundingClientRect()
+  anchorRect = r ? { left: r.left, top: r.top, width: r.width } : null
   setStore({ open: true, error: null })
   void refreshAll()
 }
@@ -237,13 +242,15 @@ function useDrawStore(): DrawStore {
 }
 
 function DrawButton(_props: Record<string, unknown>): React.ReactElement {
+  const ref = React.useRef<HTMLButtonElement | null>(null)
   return React.createElement(
     'button',
     {
+      ref,
       type: 'button',
       className: 'imgdraw-btn',
       title: '文生图（dsh-imgdraw）',
-      onClick: () => openPopup(),
+      onClick: () => openPopup(ref.current),
       'aria-label': '生图',
     },
     '🎨 生图',
@@ -369,7 +376,29 @@ function DrawPopup(_props: Record<string, unknown>): React.ReactElement | null {
     rows.push(card)
   }
 
-  return React.createElement('div', { className: 'imgdraw-popup', role: 'dialog', 'aria-label': '文生图' },
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  const width = Math.min(560, vw - 24)
+  let left: number
+  let bottom: number
+  let maxHeight: number
+  if (anchorRect) {
+    // 以触发按钮为锚点，向上弹出于输入框正上方；再夹到视口内。
+    left = Math.min(Math.max(anchorRect.left + anchorRect.width / 2 - width / 2, 12), Math.max(12, vw - width - 12))
+    bottom = Math.max(vh - anchorRect.top + 10, 12)
+    maxHeight = Math.max(anchorRect.top - 24, 240)
+  } else {
+    left = Math.max((vw - width) / 2, 12)
+    bottom = 104
+    maxHeight = vh - 160
+  }
+
+  const node = React.createElement('div', {
+    className: 'imgdraw-popup',
+    role: 'dialog',
+    'aria-label': '文生图',
+    style: { left, bottom, width, maxHeight: Math.min(maxHeight, vh - 24) },
+  },
     React.createElement('div', { className: 'imgdraw-popup-head' },
       React.createElement('span', { className: 'imgdraw-popup-title' }, '🎨 文生图'),
       React.createElement('button', { type: 'button', className: 'imgdraw-mini', onClick: () => closePopup(), 'aria-label': '关闭' }, '✕'),
@@ -448,41 +477,43 @@ function DrawPopup(_props: Record<string, unknown>): React.ReactElement | null {
       ) : null,
     ),
   )
+  return createPortal(node, document.body)
 }
 
 // ---- styles ----------------------------------------------------------------
 
 const CSS = `
-.imgdraw-btn{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 8px;border:0;background:transparent;color:var(--dsw-alias-label-secondary);border-radius:6px;font-size:13px;line-height:1;cursor:pointer;user-select:none}
+.imgdraw-btn{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 8px;border:0;background:transparent;color:var(--dsw-alias-label-secondary);border-radius:var(--dsw-radius-sm);font-size:13px;line-height:1;cursor:pointer;user-select:none}
 .imgdraw-btn:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}
-.imgdraw-btn:focus-visible{outline:2px solid var(--dsw-alias-state-primary);outline-offset:1px}
-.imgdraw-popup{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));max-height:min(72vh,640px);display:flex;flex-direction:column;background:var(--dsw-alias-bg-overlay,var(--dsw-alias-bg-layer-2,#fff));color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.3);z-index:120;font-size:13px}
-.imgdraw-popup-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--dsw-alias-border-l1)}
+.imgdraw-btn:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary);outline-offset:1px}
+.imgdraw-popup{position:fixed;z-index:1200;box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden;background:var(--dsw-specific-menu,var(--dsw-alias-bg-base,#1c1c1e));color:var(--dsw-alias-label-primary);--dsw-elevation-stroke-color:var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-lg);backdrop-filter:var(--dsw-menu-backdrop-filter);box-shadow:var(--dsw-elevation-panel);font-family:var(--dsw-font-family);font-size:13px;line-height:1.5}
+.imgdraw-popup-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--dsw-alias-border-l1)}
 .imgdraw-popup-title{font-size:14px;font-weight:600}
-.imgdraw-popup-body{padding:12px 14px;overflow-y:auto}
-.imgdraw-textarea{width:100%;box-sizing:border-box;min-height:88px;resize:vertical;background:var(--dsw-alias-bg-layer-2,transparent);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:8px 10px;font:inherit;line-height:1.6}
-.imgdraw-textarea:focus{outline:2px solid var(--dsw-alias-state-primary);outline-offset:0}
-.imgdraw-row{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.imgdraw-popup-body{padding:14px 16px;overflow-y:auto}
+.imgdraw-textarea{width:100%;box-sizing:border-box;min-height:84px;resize:vertical;background:var(--dsw-specific-input-major,var(--dsw-alias-interactive-bg-hover));color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-md);padding:8px 10px;font:inherit;line-height:1.6}
+.imgdraw-textarea:focus{outline:2px solid var(--dsw-alias-state-business-primary);outline-offset:0;border-color:transparent}
+.imgdraw-row{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .imgdraw-field{display:inline-flex;align-items:center;gap:6px;color:var(--dsw-alias-label-secondary)}
-.imgdraw-field select{background:var(--dsw-alias-bg-layer-2,transparent);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:6px;padding:4px 6px;font:inherit}
-.imgdraw-quota{display:flex;flex-direction:column;gap:2px;margin-top:8px;color:var(--dsw-alias-label-tertiary);font-size:12px}
-.imgdraw-err{margin-top:8px;padding:8px 10px;border-radius:8px;color:var(--dsw-alias-state-error-primary);background:color-mix(in srgb,var(--dsw-alias-state-error-primary) 12%,transparent);word-break:break-all}
-.imgdraw-actions{display:flex;align-items:center;gap:10px;margin-top:12px}
-.imgdraw-go{flex:1;padding:8px 0;border:0;border-radius:8px;background:var(--dsw-alias-state-primary,var(--dsw-alias-interactive-bg-hover));color:var(--dsw-alias-bg-overlay,#fff);font-size:14px;font-weight:600;cursor:pointer}
-.imgdraw-go:disabled{opacity:.55;cursor:default}
-.imgdraw-mini{padding:2px 8px;border:1px solid var(--dsw-alias-border-l1);border-radius:6px;background:transparent;color:var(--dsw-alias-label-secondary);font-size:12px;cursor:pointer;text-decoration:none;display:inline-block}
-.imgdraw-mini:hover{background:var(--dsw-alias-interactive-bg-hover)}
+.imgdraw-field select{background:var(--dsw-specific-input-major,var(--dsw-alias-interactive-bg-hover));color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-sm);padding:4px 6px;font:inherit;cursor:pointer}
+.imgdraw-quota{display:flex;flex-direction:column;gap:3px;margin-top:10px;color:var(--dsw-alias-label-tertiary);font-size:12px}
+.imgdraw-err{margin-top:8px;padding:8px 10px;border-radius:var(--dsw-radius-md);color:var(--dsw-alias-state-error-primary);background:color-mix(in srgb,var(--dsw-alias-state-error-primary) 12%,transparent);word-break:break-all}
+.imgdraw-actions{display:flex;align-items:center;gap:10px;margin-top:14px}
+.imgdraw-go{flex:1;height:34px;padding:0 16px;border:0;border-radius:var(--dsw-radius-md);background:var(--dsw-alias-state-business-primary);color:var(--dsw-alias-label-primary-inverted);font-size:14px;font-weight:600;cursor:pointer;transition:filter .15s ease}
+.imgdraw-go:hover{filter:brightness(1.08)}
+.imgdraw-go:disabled{opacity:.5;cursor:default;filter:none}
+.imgdraw-mini{height:26px;padding:0 10px;border:1px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-sm);background:transparent;color:var(--dsw-alias-label-secondary);font-size:12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.imgdraw-mini:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}
 .imgdraw-mini:disabled{opacity:.5;cursor:default}
 .imgdraw-kept{color:var(--dsw-alias-state-success-primary);border-color:color-mix(in srgb,var(--dsw-alias-state-success-primary) 45%,transparent)}
 .imgdraw-danger:hover{color:var(--dsw-alias-state-error-primary)}
 .imgdraw-muted{color:var(--dsw-alias-label-tertiary);font-size:12px}
-.imgdraw-job{margin-top:12px;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;padding:10px}
+.imgdraw-job{margin-top:12px;border:1px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-md);padding:10px}
 .imgdraw-running{opacity:.85}
 .imgdraw-job-error{border-color:color-mix(in srgb,var(--dsw-alias-state-error-primary) 40%,transparent)}
 .imgdraw-job-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .imgdraw-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .imgdraw-cell{margin:0;display:flex;flex-direction:column;gap:6px}
-.imgdraw-cell img{width:100%;height:auto;border-radius:8px;display:block;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-2)}
+.imgdraw-cell img{width:100%;height:auto;border-radius:var(--dsw-radius-md);display:block;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-specific-input-major)}
 .imgdraw-cell figcaption{display:flex;flex-direction:column;gap:4px}
 .imgdraw-fname{font-size:11px;color:var(--dsw-alias-label-tertiary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .imgdraw-file-actions{display:flex;gap:6px}
