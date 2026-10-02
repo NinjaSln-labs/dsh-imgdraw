@@ -3,7 +3,7 @@
 > 本文件由模板单源拼装（core + 分类 append）：发布通道/发布流程/应急发布由分类 append 决定；
 > 共性纪律在 core。
 
-## 发布状态（2026-09-05 更新）
+## 发布状态（2026-10-02 更新）
 
 | 项 | 状态 |
 |---|---|
@@ -16,6 +16,14 @@
 
 > 每版一行：**做了什么 + 为什么 + 怎么验证的**；重大教训展开写进当版条目。
 
+- **0.2.0**（本次发布）— 适配宿主 `dsh 0.2.0-rc.2`：peer/devDeps 全量升 `^0.2.0-rc.2` 元组
+  （dsh 兼容性门禁只把每个 `@deepseek-ai/dsh-*` peer 与**单一 runtime 版本**比对，不比对各包自身版本）；
+  `check-deploy` 白名单纳入官方 bundle `dsh-mcp-client` 及其传递依赖 `dsh-util-values`；
+  生图弹窗位置与样式重绘（client 半改用 `react-dom` portal 挂 `document.body` + 按触发按钮锚点定位，
+  摆脱 `transform` 祖先劫持 `position:fixed`；配色改用壳层原生 token）
+  - 为什么升 minor：0.1.0 只适配旧宿主，本版标志新的宿主兼容线
+  - 验证：验证链全绿（build→typecheck→mount）；实机四点（`draw_image` 工具 / `GET /imgdraw/` 200 /
+    `POST /imgdraw-rpc` backends 200 / 弹窗开页）通过；tag `imgdraw-v0.2.0` 触发 CI（OIDC provenance）
 - **0.1.0**（已发布，`latest`）— 文生图 bundle：`draw_image` 工具 + 生图弹窗 + `/imgdraw` 路由 + 历史持久化
   （feat `760b35d` + fix `2c80983` + 标准化 `1a94d2f`..`6f17e3e`）；tag `imgdraw-v0.1.0` 触发 CI 发布
   - 验证：CI 7 步全绿（含 `Guard: tag version matches package.json` / Verify / Publish）；provenance
@@ -60,11 +68,10 @@ builder `github-hosted` → run `33958000789` attempts/1 → 仓库
 1. **`npm audit signatures` 要在「依赖它的工程」里跑，不是本仓** —— 本仓就是 dsh-imgdraw
    本身，它不在自己的依赖图里（跑出来是 23 条其他包，无 imgdraw 条目）。
 2. **不能裸跑 `pnpm add dsh-imgdraw`** —— 会 `ERR_PNPM_NO_MATCHING_VERSION`。原因：
-   dsh 的宿主包（`dsh-tools` / `dsh-client-runtime` 等）在 npm 上 `latest` 只有
-   `0.0.1-rc.1`，本仓 peer 声明的是 `^0.1.2-alpha.4` / `^0.1.1-rc.2`（同元组下界，见
-   `AGENTS.md` 坑 7），且 `dsh-tools@0.1.2-alpha.x` 自身依赖
-   `@deepseek-ai/dsh-invariants@>=0.1.2 <0.2.0-0`，而该包无任何已发布版本满足
-   （0.1.2 只有 `-alpha.5` / `-rc.1`，均 < 0.1.2）。`dsh plugin add` 能成功是因为它
+   dsh 的宿主包（`dsh-tools` / `dsh-client-ui-conversation` 等）在 npm 上 `latest` 只有
+   `0.0.1-rc.1`，本仓 peer 声明的是 `^0.2.0-rc.2`（与当前宿主 dsh 0.2.0-rc.2 同元组下界，见
+   `AGENTS.md` 坑 7）——这些宿主包只发布在 `next` dist-tag 下，裸解析拿不到。
+   `dsh plugin add` 能成功是因为它
    初始化 profile 时写入 `pnpm-workspace.yaml` 含 `autoInstallPeers: false`（宿主在
    `dsh-app-boot` 的 `PROFILE_PNPM_WORKSPACE` 常量里），于是 peer 不被解析。
    **所以 README 写 `dsh plugin add` 而非 `pnpm add` 是刻意的**，不要把命令改成裸 pnpm。

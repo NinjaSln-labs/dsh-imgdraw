@@ -22,7 +22,10 @@ import { join, resolve, isAbsolute, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const ALLOWED_HOST_PKGS = new Set(['cosmokit', 'schemastery']);
+// profile 内的 @deepseek-ai/ 允许集：空白名单＝宿主核心包阴影（第二套 @deepseek-ai/*，
+// Symbol 错配/400 前兆）。除 cosmokit/schemastery 外，0.2.0-rc.2 起官方 bundle
+// （如 dsh-mcp-client，profile 显式依赖）及其传递依赖（dsh-util-values）也合法在册。
+const ALLOWED_HOST_PKGS = new Set(['cosmokit', 'schemastery', 'dsh-mcp-client', 'dsh-util-values']);
 
 // ---------- 参数 ----------
 const argv = process.argv.slice(2);
@@ -153,7 +156,7 @@ if (existsSync(dsaiDir)) {
     results.push({ name: '@deepseek-ai/*', status: 'FAIL', msg: `出现非白名单宿主核心包：${present.join(', ')} → 第二套 @deepseek-ai/*，Symbol 错配/400 前兆；用 dsh plugin --profile web install 重装` });
     failed++;
   } else {
-    results.push({ name: '@deepseek-ai/*', status: 'PASS', msg: '仅 cosmokit / schemastery，无宿主核心包阴影' });
+    results.push({ name: '@deepseek-ai/*', status: 'PASS', msg: `仅白名单包（${[...ALLOWED_HOST_PKGS].join(' / ')}），无宿主核心包阴影` });
   }
 }
 

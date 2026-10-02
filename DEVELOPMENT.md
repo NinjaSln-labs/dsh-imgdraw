@@ -115,5 +115,5 @@ pre-commit 钩子（`.githooks/pre-commit`）：提交涉及 `src/`、`scripts/`
 | 读宿主服务返回形状没查契约就猜 | 「看似对上」实未生效，被缓存/降级掩盖，重启即露馅 | Sprint 计划契约预检（stub 必须按宿主真实契约形状写） |
 | bundle boot 早期用 `ctx.get` 取可选服务 | 工具注册成功、路由静默不注册（落 SPA fallback） | 分类纪律「可选服务一律 `ctx.inject`」 |
 | 单库独立 `npm install` 只装自身 devDeps | `Cannot find package '@deepseek-ai/...'` | devDependencies 全量声明运行时可达宿主包 |
-| semver 预发布元组不同（`^0.1.0-rc.6` vs `0.1.2-alpha.x`） | peer 装成混配版本，运行时 API 缺失 | peer/devDeps 下界必须与宿主**同元组** |
+| 宿主换元组未同步 peer（`^0.1.2-alpha.4` → `^0.2.0-rc.2`） | peer 装成混配版本，运行时 API 缺失；bundle 被 dsh 启动 skip（路由 404、无报错） | peer/devDeps 下界必须与宿主**同元组**；跟随宿主升级后必跑验证链 |
 | `ctx.inject` 回调异步、mount 脚本同步检查 | 注册结果为空，误判挂载失败 | mount 断言必须在 inject 回调 settle 之后 |

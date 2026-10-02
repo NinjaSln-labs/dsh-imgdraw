@@ -30,7 +30,7 @@ npm run typecheck                # 真实严格类型检查（无 || true 吞错
 npm test                         # 验证链单源入口：scripts/verify.mjs（build→typecheck→smoke/vitest→mount，探测式）
 ```
 
-> 本仓库的运行时可达宿主包已全量声明进 `devDependencies`（peer 同元组下界 `^0.1.2-alpha.4` + 间接宿主包）——
+> 本仓库的运行时可达宿主包已全量声明进 `devDependencies`（peer 同元组下界 `^0.2.0-rc.2`，对应当前宿主 dsh 0.2.0-rc.2 + 间接宿主包）——
 > 单库独立 `npm install` 不会带入宿主 peer，缺了构建即报 `Cannot find package`。新加依赖时参照此规则。
 > `package-lock.json` 必须生成并入库（CI 的 `npm ci` 依赖它）。
 
