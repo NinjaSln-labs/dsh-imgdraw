@@ -55,7 +55,7 @@
 | 溯源链 | `npm view dsh-imgdraw@0.2.0 dist.attestations.provenance.predicateType` | `https://slsa.dev/provenance/v1` |
 | 发布工作流 | `gh run view 36988626481` | publish job success：Guard 版本守卫 / Verify / Publish to npm (OIDC) 均 success；`+ dsh-imgdraw@0.2.0`，provenance 已入 sigstore tlog |
 
-> 注：本仓 profile 当前为 `file:` 安装（联调态），未走 registry 重装路径。
+> 实机重装：本机 web profile 由 `file:` 切回 registry `^0.2.0`（`dsh plugin --profile web add dsh-imgdraw@^0.2.0`）；重启后四点验收通过（`/imgdraw/` 200、`/imgdraw-rpc` backends 200、draw_image 工具与 2 路由挂载），`check:deploy` registry 内容与本仓 lib 一致。
 
 ### 0.1.0 发布后验证结果（2026-09-05，逐项实测）
 
