@@ -7,8 +7,8 @@
 
 | 项 | 状态 |
 |---|---|
-| npm | ✅ **已发布**（2026-09-05）：`0.1.0`（`latest`，CI 带 provenance）+ `0.1.0-rc.1`（`next`，本地 bootstrap 占位，无 provenance） |
-| GitHub | `NinjaSln-labs/dsh-imgdraw` main；发版 tag `imgdraw-v*`（已用：`imgdraw-v0.1.0`） |
+| npm | ✅ **已发布**（2026-10-02）：`0.2.0`（`latest`，CI 带 provenance）；历史：`0.1.0` + `0.1.0-rc.1`（`next`，本地 bootstrap 占位，无 provenance） |
+| GitHub | `NinjaSln-labs/dsh-imgdraw` main；发版 tag `imgdraw-v*`（已用：`imgdraw-v0.1.0`、`imgdraw-v0.2.0`） |
 | 本地验证 | 验证链全绿（build → typecheck → mount）+ 实机四点运行时验收通过（工具 / 路由 / RPC / 弹窗） |
 | 前置条件 | ✅ **Trusted Publisher 已配置**（2026-09-05，首次即通过）：Owner `NinjaSln-labs` / Repository `dsh-imgdraw` / Workflow file `publish.yml` / Environment 留空 |
 
@@ -46,6 +46,16 @@
 - 实机重装/升级路径实测一遍（面向用户的安装命令照 README 走一遍）
 
 > 通道专属验证命令由分类 append 覆盖（按实际通道选择对应命令）。
+
+### 0.2.0 发布后验证结果（2026-10-02，逐项实测）
+
+| 项 | 命令 | 结果 |
+|---|---|---|
+| latest 更新 | `npm view dsh-imgdraw dist-tags` | `{ next: 0.1.0-rc.1, latest: 0.2.0 }` |
+| 溯源链 | `npm view dsh-imgdraw@0.2.0 dist.attestations.provenance.predicateType` | `https://slsa.dev/provenance/v1` |
+| 发布工作流 | `gh run view 36988626481` | publish job success：Guard 版本守卫 / Verify / Publish to npm (OIDC) 均 success；`+ dsh-imgdraw@0.2.0`，provenance 已入 sigstore tlog |
+
+> 注：本仓 profile 当前为 `file:` 安装（联调态），未走 registry 重装路径。
 
 ### 0.1.0 发布后验证结果（2026-09-05，逐项实测）
 
